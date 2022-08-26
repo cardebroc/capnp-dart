@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:capnp/capnp.dart';
 import 'package:capnp/rpc/capnp_rpc.dart';
+import 'package:todo/todo.dart';
 
 import 'constants.dart';
 import 'message.dart';
@@ -10,7 +11,8 @@ import 'objects/struct.dart';
 import 'pointer.dart';
 
 class Segment {
-  Segment(this.message, this.data) : assert(data.lengthInBytes % CapnpConstants.bytesPerWord == 0);
+  Segment(this.message, this.data)
+      : assert(data.lengthInBytes % CapnpConstants.bytesPerWord == 0);
 
   CapnpMessage message;
   ByteData data;
@@ -18,16 +20,19 @@ class Segment {
 
   SegmentView fullView() => SegmentView._(this, 0, lengthInBytes ~/ 8);
 
-  SegmentView view(int offsetInWords, int lengthInWords) => SegmentView._(this, offsetInWords, lengthInWords);
+  SegmentView view(int offsetInWords, int lengthInWords) =>
+      SegmentView._(this, offsetInWords, lengthInWords);
 }
 
 class SegmentView {
   SegmentView._(this.segment, this.offsetInWords, this.lengthInWords)
       : assert(offsetInWords >= 0),
         assert(lengthInWords >= 0),
-        assert((offsetInWords + lengthInWords) * CapnpConstants.bytesPerWord <= segment.lengthInBytes),
+        assert((offsetInWords + lengthInWords) * CapnpConstants.bytesPerWord <=
+            segment.lengthInBytes),
         data = segment.data.buffer.asByteData(
-          segment.data.offsetInBytes + offsetInWords * CapnpConstants.bytesPerWord,
+          segment.data.offsetInBytes +
+              offsetInWords * CapnpConstants.bytesPerWord,
           lengthInWords * CapnpConstants.bytesPerWord,
         );
 
@@ -84,7 +89,8 @@ class SegmentView {
     data.setUint8(byteOffset, byte);
   }
 
-  int getUInt8(int offsetInBytes, {int defaultValue = 0}) => data.getUint8(offsetInBytes) ^ defaultValue;
+  int getUInt8(int offsetInBytes, {int defaultValue = 0}) =>
+      data.getUint8(offsetInBytes) ^ defaultValue;
   int getUInt16(int offsetInBytes, {int defaultValue = 0}) =>
       data.getUint16(offsetInBytes, Endian.little) ^ defaultValue;
   int getUInt32(int offsetInBytes, {int defaultValue = 0}) =>
@@ -92,13 +98,19 @@ class SegmentView {
   int getUInt64(int offsetInBytes, {int defaultValue = 0}) =>
       data.getUint64(offsetInBytes, Endian.little) ^ defaultValue;
 
-  int getInt8(int offsetInBytes, {int defaultValue = 0}) => data.getInt8(offsetInBytes) ^ defaultValue;
-  int getInt16(int offsetInBytes, {int defaultValue = 0}) => data.getInt16(offsetInBytes, Endian.little) ^ defaultValue;
-  int getInt32(int offsetInBytes, {int defaultValue = 0}) => data.getInt32(offsetInBytes, Endian.little) ^ defaultValue;
-  int getInt64(int offsetInBytes, {int defaultValue = 0}) => data.getInt64(offsetInBytes, Endian.little) ^ defaultValue;
+  int getInt8(int offsetInBytes, {int defaultValue = 0}) =>
+      data.getInt8(offsetInBytes) ^ defaultValue;
+  int getInt16(int offsetInBytes, {int defaultValue = 0}) =>
+      data.getInt16(offsetInBytes, Endian.little) ^ defaultValue;
+  int getInt32(int offsetInBytes, {int defaultValue = 0}) =>
+      data.getInt32(offsetInBytes, Endian.little) ^ defaultValue;
+  int getInt64(int offsetInBytes, {int defaultValue = 0}) =>
+      data.getInt64(offsetInBytes, Endian.little) ^ defaultValue;
 
-  double getFloat32(int offsetInBytes, {int? defaultValue}) => data.getFloat32(offsetInBytes, Endian.little);
-  double getFloat64(int offsetInBytes, {int? defaultValue}) => data.getFloat64(offsetInBytes, Endian.little);
+  double getFloat32(int offsetInBytes, {int? defaultValue}) =>
+      data.getFloat32(offsetInBytes, Endian.little);
+  double getFloat64(int offsetInBytes, {int? defaultValue}) =>
+      data.getFloat64(offsetInBytes, Endian.little);
 
   void setInt8(int offsetInBytes, int value, {int defaultValue = 0}) =>
       data.setInt8(offsetInBytes, value ^ defaultValue);
@@ -219,6 +231,11 @@ class SegmentView {
     return CapnpFloat32List(pointer).value;
   }
 
+  List<String> getTextList(int offsetInWords) {
+    final pointer = ListPointer.resolvedFromView(subview(offsetInWords, 1));
+    return TextList(pointer).value;
+  }
+
   // Complex types:
   UnmodifiableCompositeListView<T> getCompositeList<T>(
     int offsetInWords,
@@ -231,13 +248,18 @@ class SegmentView {
     return UnmodifiableCompositeListView(CompositeList.fromPointer(pointer));
   }
 
-  CompositeList<T> newCompositeList<T>(int offsetIntoView, int numElements, StructBuilderFactory<T> factory) {
+  TextList newTextList(int offsetInWordsIntoView, int numberElements) =>
+      TODO("Not implemented yet!");
+
+  CompositeList<T> newCompositeList<T>(
+      int offsetIntoView, int numElements, StructBuilderFactory<T> factory) {
     var built = factory();
     ByteData data = ByteData(16 + built.layout.bytes() * numElements);
     Segment segment = Segment(this.segment.message, data);
-    ListPointer.save(segment.fullView(), 0, 0, 7, built.layout.words() * numElements);
-    StructPointer.save(
-        segment.fullView(), 1, numElements, built.layout.dataSectionLengthInWords, built.layout.numPointers);
+    ListPointer.save(
+        segment.fullView(), 0, 0, 7, built.layout.words() * numElements);
+    StructPointer.save(segment.fullView(), 1, numElements,
+        built.layout.dataSectionLengthInWords, built.layout.numPointers);
 
     CompositeListPointer<T> ptr = CompositeListPointer.resolvedFromView(
         segment.view(0, 2 + numElements * built.layout.words()),
@@ -246,7 +268,8 @@ class SegmentView {
     CompositeList<T> list = CompositeList.fromPointer(ptr);
 
     int newSegmentId = segment.message.addSegment(segment);
-    InterSegmentPointer.save(this, offsetIntoView, InterSegmentPointerType.Simple, 0, newSegmentId);
+    InterSegmentPointer.save(
+        this, offsetIntoView, InterSegmentPointerType.Simple, 0, newSegmentId);
 
     return list;
   }
@@ -261,7 +284,8 @@ class SegmentView {
 
   T getClient<T>(int offsetInWords, ClientFactory<T> factory) {
     var ptr = CapabilityPointer.fromView(subview(offsetInWords, 1));
-    return factory(segment.message.network!.resolveCapability(ptr, segment.message.capTable!)!);
+    return factory(segment.message.network!
+        .resolveCapability(ptr, segment.message.capTable!)!);
   }
 
   CapabilityList getCapabilityList(int offsetInWords) {
