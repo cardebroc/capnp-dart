@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:capnp/capnp.dart';
+
 import '../constants.dart';
 import '../pointer.dart';
 import '../segment.dart';
@@ -17,14 +19,16 @@ abstract class CapnpList {
 // Bool list:
 class BoolList extends ListMixin<bool> {
   BoolList._(ByteBuffer buffer, int offsetInBytes, this.length)
-      : data = buffer.asByteData(offsetInBytes, (length / CapnpConstants.bitsPerByte).ceil());
+      : data = buffer.asByteData(
+            offsetInBytes, (length / CapnpConstants.bitsPerByte).ceil());
 
   final ByteData data;
 
   @override
   final int length;
   @override
-  set length(newLength) => throw UnsupportedError('Cannot resize a fixed-length list');
+  set length(newLength) =>
+      throw UnsupportedError('Cannot resize a fixed-length list');
 
   @override
   bool operator [](int index) {
@@ -57,62 +61,76 @@ class BoolList extends ListMixin<bool> {
 mixin _UnmodifiableListMixin<E> on List<E> {
   /// This operation is not supported by an unmodifiable list.
   @override
-  void operator []=(int index, E value) => throw UnsupportedError('Cannot modify an unmodifiable list');
+  void operator []=(int index, E value) =>
+      throw UnsupportedError('Cannot modify an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
   // ignore: avoid_setters_without_getters
-  set length(int newLength) => throw UnsupportedError('Cannot change the length of an unmodifiable list');
+  set length(int newLength) => throw UnsupportedError(
+      'Cannot change the length of an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
   // ignore: avoid_setters_without_getters
-  set first(E element) => throw UnsupportedError('Cannot modify an unmodifiable list');
+  set first(E element) =>
+      throw UnsupportedError('Cannot modify an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
   // ignore: avoid_setters_without_getters
-  set last(E element) => throw UnsupportedError('Cannot modify an unmodifiable list');
+  set last(E element) =>
+      throw UnsupportedError('Cannot modify an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void setAll(int at, Iterable<E> iterable) => throw UnsupportedError('Cannot modify an unmodifiable list');
+  void setAll(int at, Iterable<E> iterable) =>
+      throw UnsupportedError('Cannot modify an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void add(E value) => throw UnsupportedError('Cannot add to an unmodifiable list');
+  void add(E value) =>
+      throw UnsupportedError('Cannot add to an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void insert(int index, E element) => throw UnsupportedError('Cannot add to an unmodifiable list');
+  void insert(int index, E element) =>
+      throw UnsupportedError('Cannot add to an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void insertAll(int at, Iterable<E> iterable) => throw UnsupportedError('Cannot add to an unmodifiable list');
+  void insertAll(int at, Iterable<E> iterable) =>
+      throw UnsupportedError('Cannot add to an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void addAll(Iterable<E> iterable) => throw UnsupportedError('Cannot add to an unmodifiable list');
+  void addAll(Iterable<E> iterable) =>
+      throw UnsupportedError('Cannot add to an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  bool remove(Object? element) => throw UnsupportedError('Cannot remove from an unmodifiable list');
+  bool remove(Object? element) =>
+      throw UnsupportedError('Cannot remove from an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void removeWhere(bool Function(E element) test) => throw UnsupportedError('Cannot remove from an unmodifiable list');
+  void removeWhere(bool Function(E element) test) =>
+      throw UnsupportedError('Cannot remove from an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void retainWhere(bool Function(E element) test) => throw UnsupportedError('Cannot remove from an unmodifiable list');
+  void retainWhere(bool Function(E element) test) =>
+      throw UnsupportedError('Cannot remove from an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void sort([Comparator<E>? compare]) => throw UnsupportedError('Cannot modify an unmodifiable list');
+  void sort([Comparator<E>? compare]) =>
+      throw UnsupportedError('Cannot modify an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void shuffle([Random? random]) => throw UnsupportedError('Cannot modify an unmodifiable list');
+  void shuffle([Random? random]) =>
+      throw UnsupportedError('Cannot modify an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
@@ -120,20 +138,24 @@ mixin _UnmodifiableListMixin<E> on List<E> {
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  E removeAt(int index) => throw UnsupportedError('Cannot remove from an unmodifiable list');
+  E removeAt(int index) =>
+      throw UnsupportedError('Cannot remove from an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  E removeLast() => throw UnsupportedError('Cannot remove from an unmodifiable list');
+  E removeLast() =>
+      throw UnsupportedError('Cannot remove from an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void setRange(int start, int end, Iterable<E> iterable, [int skipCount = 0]) =>
+  void setRange(int start, int end, Iterable<E> iterable,
+          [int skipCount = 0]) =>
       throw UnsupportedError('Cannot modify an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void removeRange(int start, int end) => throw UnsupportedError('Cannot remove from an unmodifiable list');
+  void removeRange(int start, int end) =>
+      throw UnsupportedError('Cannot remove from an unmodifiable list');
 
   /// This operation is not supported by an unmodifiable list.
   @override
@@ -142,7 +164,8 @@ mixin _UnmodifiableListMixin<E> on List<E> {
 
   /// This operation is not supported by an unmodifiable list.
   @override
-  void fillRange(int start, int end, [E? fill]) => throw UnsupportedError('Cannot modify an unmodifiable list');
+  void fillRange(int start, int end, [E? fill]) =>
+      throw UnsupportedError('Cannot modify an unmodifiable list');
 }
 
 extension ByteBufferAsBoolList on ByteBuffer {
@@ -170,7 +193,9 @@ extension ByteBufferAsBoolList on ByteBuffer {
 }
 
 /// View of a [BoolList] that disallows modification.
-class UnmodifiableBoolListView extends ListBase<bool> with _UnmodifiableListMixin<bool> implements BoolList {
+class UnmodifiableBoolListView extends ListBase<bool>
+    with _UnmodifiableListMixin<bool>
+    implements BoolList {
   UnmodifiableBoolListView(BoolList list) : _list = list;
 
   final BoolList _list;
@@ -195,7 +220,8 @@ class CapnpBoolList extends CapnpList {
   final int length;
 
   UnmodifiableBoolListView get value {
-    final list = segmentView.data.buffer.asBoolList(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asBoolList(segmentView.totalOffsetInBytes, length);
     return UnmodifiableBoolListView(list);
   }
 }
@@ -203,7 +229,8 @@ class CapnpBoolList extends CapnpList {
 abstract class _ByteBasedList extends CapnpList {
   _ByteBasedList(ListPointer pointer, this.elementSizeInBytes)
       : assert(!pointer.isCompositeList),
-        assert(pointer.elementSizeInBits == elementSizeInBytes * CapnpConstants.bitsPerByte),
+        assert(pointer.elementSizeInBits ==
+            elementSizeInBytes * CapnpConstants.bitsPerByte),
         length = pointer.elementCount,
         super(pointer);
 
@@ -217,7 +244,8 @@ class CapnpUInt8List extends _ByteBasedList {
   CapnpUInt8List(ListPointer pointer) : super(pointer, 1);
 
   UnmodifiableUint8ListView get value {
-    final list = segmentView.data.buffer.asUint8List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asUint8List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableUint8ListView(list);
   }
 }
@@ -226,7 +254,8 @@ class CapnpUInt16List extends _ByteBasedList {
   CapnpUInt16List(ListPointer pointer) : super(pointer, 2);
 
   UnmodifiableUint16ListView get value {
-    final list = segmentView.data.buffer.asUint16List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asUint16List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableUint16ListView(list);
   }
 }
@@ -235,7 +264,8 @@ class CapnpUInt32List extends _ByteBasedList {
   CapnpUInt32List(ListPointer pointer) : super(pointer, 4);
 
   UnmodifiableUint32ListView get value {
-    final list = segmentView.data.buffer.asUint32List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asUint32List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableUint32ListView(list);
   }
 }
@@ -244,7 +274,8 @@ class CapnpUInt64List extends _ByteBasedList {
   CapnpUInt64List(ListPointer pointer) : super(pointer, 8);
 
   UnmodifiableUint64ListView get value {
-    final list = segmentView.data.buffer.asUint64List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asUint64List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableUint64ListView(list);
   }
 }
@@ -254,7 +285,8 @@ class CapnpInt8List extends _ByteBasedList {
   CapnpInt8List(ListPointer pointer) : super(pointer, 1);
 
   UnmodifiableInt8ListView get value {
-    final list = segmentView.data.buffer.asInt8List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asInt8List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableInt8ListView(list);
   }
 }
@@ -263,7 +295,8 @@ class CapnpInt16List extends _ByteBasedList {
   CapnpInt16List(ListPointer pointer) : super(pointer, 2);
 
   UnmodifiableInt16ListView get value {
-    final list = segmentView.data.buffer.asInt16List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asInt16List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableInt16ListView(list);
   }
 }
@@ -272,7 +305,8 @@ class CapnpInt32List extends _ByteBasedList {
   CapnpInt32List(ListPointer pointer) : super(pointer, 4);
 
   UnmodifiableInt32ListView get value {
-    final list = segmentView.data.buffer.asInt32List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asInt32List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableInt32ListView(list);
   }
 }
@@ -281,7 +315,8 @@ class CapnpInt64List extends _ByteBasedList {
   CapnpInt64List(ListPointer pointer) : super(pointer, 8);
 
   UnmodifiableInt64ListView get value {
-    final list = segmentView.data.buffer.asInt64List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asInt64List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableInt64ListView(list);
   }
 }
@@ -291,7 +326,8 @@ class CapnpFloat32List extends _ByteBasedList {
   CapnpFloat32List(ListPointer pointer) : super(pointer, 4);
 
   UnmodifiableFloat32ListView get value {
-    final list = segmentView.data.buffer.asFloat32List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asFloat32List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableFloat32ListView(list);
   }
 }
@@ -300,7 +336,8 @@ class CapnpFloat64List extends _ByteBasedList {
   CapnpFloat64List(ListPointer pointer) : super(pointer, 8);
 
   UnmodifiableFloat64ListView get value {
-    final list = segmentView.data.buffer.asFloat64List(segmentView.totalOffsetInBytes, length);
+    final list = segmentView.data.buffer
+        .asFloat64List(segmentView.totalOffsetInBytes, length);
     return UnmodifiableFloat64ListView(list);
   }
 }
@@ -311,8 +348,21 @@ class Text extends _ByteBasedList {
 
   String get value {
     // We don't need the final 0-byte.
-    final list = segmentView.data.buffer.asUint8List(segmentView.totalOffsetInBytes, lengthInBytes - 1);
+    final list = segmentView.data.buffer
+        .asUint8List(segmentView.totalOffsetInBytes, lengthInBytes - 1);
     return utf8.decode(list);
+  }
+}
+
+class TextList extends _ByteBasedList {
+  TextList(ListPointer pointer) : super(pointer, 8);
+
+  List<String> get value {
+    final pointers = List<ListPointer>.generate(segmentView.lengthInWords,
+        (index) => ListPointer.resolvedFromView(segmentView.subview(index, 1)));
+    return List<String>.generate(
+        segmentView.lengthInWords, (index) => Text(pointers[index]).value,
+        growable: false);
   }
 }
 
@@ -320,7 +370,8 @@ class Text extends _ByteBasedList {
 abstract class CompositeList<T> extends ListMixin<T> {
   CompositeList();
 
-  factory CompositeList.fromPointer(CompositeListPointer<T> pointer) => _CompositeList(pointer);
+  factory CompositeList.fromPointer(CompositeListPointer<T> pointer) =>
+      _CompositeList(pointer);
 }
 
 class _CompositeList<T> extends CompositeList<T> {
@@ -328,7 +379,8 @@ class _CompositeList<T> extends CompositeList<T> {
     final tagWord = StructPointer.fromView(pointer.targetView.subview(0, 1));
     final elementCount = tagWord.offsetInWords;
     final elementDataSectionLengthInWords = tagWord.dataSectionLengthInWords;
-    final elementLengthInWords = elementDataSectionLengthInWords + tagWord.pointerSectionLengthInWords;
+    final elementLengthInWords =
+        elementDataSectionLengthInWords + tagWord.pointerSectionLengthInWords;
 
     return _CompositeList._(
       pointer,
@@ -351,7 +403,8 @@ class _CompositeList<T> extends CompositeList<T> {
   @override
   final int length;
   @override
-  set length(newLength) => throw UnsupportedError('Cannot resize a fixed-length list');
+  set length(newLength) =>
+      throw UnsupportedError('Cannot resize a fixed-length list');
 
   @override
   T operator [](int index) {
@@ -377,7 +430,9 @@ class _CompositeList<T> extends CompositeList<T> {
 }
 
 /// View of a [CompositeList] that disallows modification.
-class UnmodifiableCompositeListView<T> extends ListBase<T> with _UnmodifiableListMixin<T> implements CompositeList<T> {
+class UnmodifiableCompositeListView<T> extends ListBase<T>
+    with _UnmodifiableListMixin<T>
+    implements CompositeList<T> {
   UnmodifiableCompositeListView(CompositeList<T> list) : _list = list;
 
   final CompositeList<T> _list;
