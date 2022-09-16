@@ -157,8 +157,8 @@ class SegmentView {
     return CapnpUInt8List(pointer).value;
   }
 
-  void setData(int offsetInWords, ByteBuffer data) {
-    throw UnimplementedError;
+  void setData(int offsetIntoView, ByteBuffer data) {
+    segment.message.newDataSegment(this, offsetIntoView, data);
   }
 
   // Nested structs:
