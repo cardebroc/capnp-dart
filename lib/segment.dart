@@ -157,7 +157,7 @@ class SegmentView {
     return CapnpUInt8List(pointer).value;
   }
 
-  void setData(int offsetIntoView, ByteBuffer data) {
+  void setData(int offsetIntoView, Uint8List data) {
     segment.message.newDataSegment(this, offsetIntoView, data);
   }
 

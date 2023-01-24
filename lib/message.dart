@@ -134,18 +134,18 @@ class CapnpMessage {
         InterSegmentPointerType.Simple, 0, _segments.length - 1);
   }
 
-  void newDataSegment(SegmentView view, int offsetIntoView, ByteBuffer data) {
-    int numBytes = (8 + data.asByteData().lengthInBytes + 1);
+  void newDataSegment(SegmentView view, int offsetIntoView, Uint8List data) {
+    int numBytes = (8 + data.length + 1);
     int paddedBytes = (numBytes / 8).ceil() * 8;
     ByteData paddedData = ByteData(paddedBytes);
 
     for (int i = 0; i < data.lengthInBytes; i++) {
-      paddedData.setUint8(8 + i, data.asByteData().getUint8(i));
+      paddedData.setUint8(8 + i, data[i]);
     }
 
     Segment segment = Segment(this, paddedData);
     ListPointer.save(
-        segment.fullView(), 0, 0, 2, data.asByteData().lengthInBytes);
+        segment.fullView(), 0, 0, 2, data.length);
     _addSegment(segment);
     InterSegmentPointer.save(view, offsetIntoView,
         InterSegmentPointerType.Simple, 0, _segments.length - 1);
